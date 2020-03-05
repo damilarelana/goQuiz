@@ -2,7 +2,7 @@
 
 A simple Golang implementation of a Quiz that:
 
-* asks a user simple questions
+* asks a user a simple questions
 * validates their answer
 * computes their % correct answer
 * times the user in between questions
