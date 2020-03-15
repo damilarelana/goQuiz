@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"reflect"
+	"strings"
 )
 
 // defines the error message handler
@@ -29,8 +30,8 @@ func parseRecords(records [][]string) []problem {
 	returnedValue := make([]problem, len(records))
 	for i, record := range records { // iterate over the multi-dimensional slice
 		returnedValue[i] = problem{
-			question: record[0], // remember that each record is a 2 element slice [...] that represents a `question, answer` pair
-			answer:   record[1],
+			question: record[0],                    // remember that each record is a 2 element slice [...] that represents a `question, answer` pair
+			answer:   strings.TrimSpace(record[1]), // strings.TrimSpace() helps to remove spaces around answers from the CSV file
 		}
 	}
 	return returnedValue
