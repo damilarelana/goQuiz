@@ -7,9 +7,25 @@ import (
 	"os"
 )
 
+// defines the error message handler
 func errMsgHandler(msg string) {
 	fmt.Println(msg)
 	os.Exit(1)
+}
+
+// defines the structure of the `problem` type
+type problem struct {
+	question string
+	answer   string
+}
+
+//
+// define parser to
+//   * read in the multi-dimensional slice of `question, answer` i.e. CSV file data
+//   * and then return a 1 dimensional slice of `question, answer` i.e. a value of type `problem`
+//
+func parseRecords(records [][]string) []problem {
+
 }
 
 func main() {
