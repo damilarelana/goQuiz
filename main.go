@@ -51,18 +51,16 @@ func questionHandler(file *os.File) {
 	problems := parseRecords(records)
 
 	// iterate through the questions with the user
-	correctAnswerCount := 0
+	correctAnsCount := 0
 	for i, p := range problems {
 		fmt.Printf("Problem #%d: %s = \n", i+1, p.question)
 		var userAnswer string                        // define variable to store users answer to question
 		fmt.Scanf("%s\n", &userAnswer)               // read in the user's answer to question, while removing all useless spaces around string
 		if reflect.DeepEqual(userAnswer, p.answer) { // compare user's answer to the actual answer
-			fmt.Println("Correct Answer!")
-			correctAnswerCount++
+			correctAnsCount++
 		}
 	}
-
-	fmt.Println(problems) // this prints a slice of struct [which is now an easier data structure to work with]
+	fmt.Printf("You got %d out %d questions correct.\n", correctAnsCount, len(problems))
 }
 
 func main() {
