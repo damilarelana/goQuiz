@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"reflect"
 )
 
 // defines the error message handler
@@ -25,7 +26,43 @@ type problem struct {
 //   * and then return a 1 dimensional slice of `question, answer` i.e. a value of type `problem`
 //
 func parseRecords(records [][]string) []problem {
+	returnedValue := make([]problem, len(records))
+	for i, record := range records { // iterate over the multi-dimensional slice
+		returnedValue[i] = problem{
+			question: record[0], // remember that each record is a 2 element slice [...] that represents a `question, answer` pair
+			answer:   record[1],
+		}
+	}
+	return returnedValue
+}
 
+//
+// defines the quiz handler that:
+//   * extracts the question and answer from the CSV
+//   * parses it into a problem struct format
+// 	 * asks the user by iterating through the parsed data
+//
+func questionHandler(file *os.File) {
+	r := csv.NewReader(file)
+	records, err := r.ReadAll()
+	if err != nil {
+		errMsgHandler("Failed to parse the provided CSV file")
+	}
+	problems := parseRecords(records)
+
+	// iterate through the questions with the user
+	correctAnswerCount := 0
+	for i, p := range problems {
+		fmt.Printf("Problem #%d: %s = \n", i+1, p.question)
+		var userAnswer string                        // define variable to store users answer to question
+		fmt.Scanf("%s\n", &userAnswer)               // read in the user's answer to question, while removing all useless spaces around string
+		if reflect.DeepEqual(userAnswer, p.answer) { // compare user's answer to the actual answer
+			fmt.Println("Correct Answer!")
+			correctAnswerCount++
+		}
+	}
+
+	fmt.Println(problems) // this prints a slice of struct [which is now an easier data structure to work with]
 }
 
 func main() {
@@ -41,10 +78,5 @@ func main() {
 	if err != nil {
 		errMsgHandler(fmt.Sprintf("Failed to open CSV file: %s\n", *csvFilename))
 	}
-	r := csv.NewReader(openedFile)
-	records, err := r.ReadAll()
-	if err != nil {
-		errMsgHandler("Failed to parse the provided CSV file")
-	}
-	fmt.Println(records)
+	questionHandler(openedFile)
 }
