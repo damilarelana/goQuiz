@@ -61,14 +61,19 @@ func questionHandler(file *os.File) {
 			correctAnsCount++
 		}
 	}
-	fmt.Printf("You got %d out %d questions correct i.e. %d %% answered correctly .\n", correctAnsCount, len(problems), 100*(correctAnsCount/len(problems)))
+	// calculate quiz completion accuracy
+	numQuestions := len(problems)
+	correctAnsPercentage := 100.0 * float64(correctAnsCount) / float64(numQuestions)
+
+	// print out quiz results
+	fmt.Printf("You got %d out %d questions correct i.e. %.4g%% answered correctly .\n", correctAnsCount, numQuestions, correctAnsPercentage)
 }
 
 func main() {
 
 	// define flags
 	csvFilename := flag.String("csv", "quizData.csv", "a csv file containing question/answer data, in a 'question, answer' format per record line")
-	maxTimeLimit := flag.Int("limit", 30, "the maximum allowed duration of time to answer each quiz question in seconds")
+	// maxTimeLimit := flag.Int("limit", 30, "the maximum allowed duration of time to answer each quiz question in seconds")
 
 	// parse flags
 	flag.Parse() // required to initialize the specified flags with the Operating system
