@@ -7,6 +7,7 @@ import (
 	"os"
 	"reflect"
 	"strings"
+	"time"
 )
 
 // defines the error message handler
@@ -21,11 +22,13 @@ type problem struct {
 	answer   string
 }
 
-//
+// define flags
+var csvFilename *string = flag.String("csv", "quizData.csv", "a csv file containing question/answer data, in a 'question, answer' format per record line")
+var maxTimeLimit *int = flag.Int("limit", 4, "the maximum allowed duration of time to answer each quiz question in seconds")
+
 // define parser to
 //   * read in the multi-dimensional slice of `question, answer` i.e. CSV file data
 //   * and then return a 1 dimensional slice of `question, answer` i.e. a value of type `problem`
-//
 func parseRecords(records [][]string) []problem {
 	returnedValue := make([]problem, len(records))
 	for i, record := range records { // iterate over the multi-dimensional slice
@@ -37,12 +40,10 @@ func parseRecords(records [][]string) []problem {
 	return returnedValue
 }
 
-//
 // defines the quiz handler that:
 //   * extracts the question and answer from the CSV
 //   * parses it into a problem struct format
 // 	 * asks the user by iterating through the parsed data
-//
 func questionHandler(file *os.File) {
 	r := csv.NewReader(file)
 	records, err := r.ReadAll()
@@ -52,29 +53,38 @@ func questionHandler(file *os.File) {
 	problems := parseRecords(records)
 
 	// iterate through the questions with the user
-	correctAnsCount := 0
+
+	timer := time.NewTimer(time.Duration(*maxTimeLimit) * time.Second) // initialize a timer to be used to time each question
+	correctAnsCount := 0                                               // initialize counter for number of questions answer correctly
 	for i, p := range problems {
-		fmt.Printf("Problem #%d: %s = \n", i+1, p.question)
-		var userAnswer string                        // define variable to store users answer to question
-		fmt.Scanf("%s\n", &userAnswer)               // read in the user's answer to question, while removing all useless spaces around string
-		if reflect.DeepEqual(userAnswer, p.answer) { // compare user's answer to the actual answer
-			correctAnsCount++
+		// when user is within time limit, then there is no message tine the channel timer.C
+		select {
+		case <-timer.C: //checks if timer expired before any question was answered
+			fmt.Println(questionCompletionMsg(problems, correctAnsCount))
+			return
+		default:
+			fmt.Printf("Problem #%d: %s = \n", i+1, p.question)
+			var userAnswer string                        // define variable to store users answer to question
+			fmt.Scanf("%s\n", &userAnswer)               // read in the user's answer to question, while removing all useless spaces around string
+			if reflect.DeepEqual(userAnswer, p.answer) { // compare user's answer to the actual answer
+				correctAnsCount++
+			}
 		}
 	}
+	fmt.Println(questionCompletionMsg(problems, correctAnsCount))
+}
+
+// defines the function to help print quiz completion messaging
+func questionCompletionMsg(problems []problem, correctAnsCount int) string {
 	// calculate quiz completion accuracy
-	numQuestions := len(problems)
+	numQuestions := len(problems) // calculate number of questions in the quiz
 	correctAnsPercentage := 100.0 * float64(correctAnsCount) / float64(numQuestions)
 
-	// print out quiz results
-	fmt.Printf("You got %d out %d questions correct i.e. %.4g%% answered correctly .\n", correctAnsCount, numQuestions, correctAnsPercentage)
+	// return the quiz completion result string
+	return fmt.Sprintf("You got %d out %d questions correct i.e. %.4g%% answered correctly .\n", correctAnsCount, numQuestions, correctAnsPercentage)
 }
 
 func main() {
-
-	// define flags
-	csvFilename := flag.String("csv", "quizData.csv", "a csv file containing question/answer data, in a 'question, answer' format per record line")
-	// maxTimeLimit := flag.Int("limit", 30, "the maximum allowed duration of time to answer each quiz question in seconds")
-
 	// parse flags
 	flag.Parse() // required to initialize the specified flags with the Operating system
 
