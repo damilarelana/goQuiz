@@ -22,9 +22,14 @@ type problem struct {
 	answer   string
 }
 
+// create the user answerchannel [required to make the user response and timer to be unblocking with each other]
+//   * required by getAnswer()
+//   * required by questionHandler()
+var answerChannel = make(chan string)
+
 // define flags
 var csvFilename *string = flag.String("csv", "quizData.csv", "a csv file containing question/answer data, in a 'question, answer' format per record line")
-var maxTimeLimit *int = flag.Int("limit", 4, "the maximum allowed duration of time to answer each quiz question in seconds")
+var maxTimeLimit *int = flag.Int("limit", 10, "the maximum allowed duration of time to answer each quiz question in seconds")
 
 // define parser to
 //   * read in the multi-dimensional slice of `question, answer` i.e. CSV file data
@@ -52,26 +57,30 @@ func questionHandler(file *os.File) {
 	}
 	problems := parseRecords(records)
 
-	// iterate through the questions with the user
+	correctAnsCount := 0         // initialize counter for number of questions answer correctly
+	for i, p := range problems { // iterate through the questions with the user
+		timer := time.NewTimer(time.Duration(*maxTimeLimit) * time.Second) // initialize (and re-initialize) a timer for each question
+		fmt.Printf("Problem #%d: %s = \n", i+1, p.question)
+		go getAnswer() // get userAnswer
 
-	timer := time.NewTimer(time.Duration(*maxTimeLimit) * time.Second) // initialize a timer to be used to time each question
-	correctAnsCount := 0                                               // initialize counter for number of questions answer correctly
-	for i, p := range problems {
-		// when user is within time limit, then there is no message tine the channel timer.C
-		select {
+		select { // when user is within time limit, then there is no message tine the channel timer.C
 		case <-timer.C: //checks if timer expired before any question was answered
 			fmt.Println(questionCompletionMsg(problems, correctAnsCount))
 			return
-		default:
-			fmt.Printf("Problem #%d: %s = \n", i+1, p.question)
-			var userAnswer string                        // define variable to store users answer to question
-			fmt.Scanf("%s\n", &userAnswer)               // read in the user's answer to question, while removing all useless spaces around string
+		case userAnswer := <-answerChannel: // when there is a user answer in the answerChannel
 			if reflect.DeepEqual(userAnswer, p.answer) { // compare user's answer to the actual answer
 				correctAnsCount++
 			}
 		}
 	}
 	fmt.Println(questionCompletionMsg(problems, correctAnsCount))
+}
+
+// defines the function to be made a goroutine to ensure that timer and user answer are not blocking
+func getAnswer() {
+	var userAnswer string          // define variable to store users answer to question
+	fmt.Scanf("%s\n", &userAnswer) // read in the user's answer to question, while removing all useless spaces around string
+	answerChannel <- userAnswer
 }
 
 // defines the function to help print quiz completion messaging
@@ -81,7 +90,7 @@ func questionCompletionMsg(problems []problem, correctAnsCount int) string {
 	correctAnsPercentage := 100.0 * float64(correctAnsCount) / float64(numQuestions)
 
 	// return the quiz completion result string
-	return fmt.Sprintf("You got %d out %d questions correct i.e. %.4g%% accuracy.\n", correctAnsCount, numQuestions, correctAnsPercentage)
+	return fmt.Sprintf("\n You got %d out %d questions correct i.e. %.4g%% accuracy.\n", correctAnsCount, numQuestions, correctAnsPercentage)
 }
 
 func main() {
