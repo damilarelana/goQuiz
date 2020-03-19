@@ -81,7 +81,7 @@ func questionCompletionMsg(problems []problem, correctAnsCount int) string {
 	correctAnsPercentage := 100.0 * float64(correctAnsCount) / float64(numQuestions)
 
 	// return the quiz completion result string
-	return fmt.Sprintf("You got %d out %d questions correct i.e. %.4g%% answered correctly .\n", correctAnsCount, numQuestions, correctAnsPercentage)
+	return fmt.Sprintf("You got %d out %d questions correct i.e. %.4g%% accuracy.\n", correctAnsCount, numQuestions, correctAnsPercentage)
 }
 
 func main() {
