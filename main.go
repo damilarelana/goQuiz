@@ -29,7 +29,7 @@ var answerChannel = make(chan string)
 
 // define flags
 var csvFilename *string = flag.String("csv", "quizData.csv", "a csv file containing question/answer data, in a 'question, answer' format per record line")
-var maxTimeLimit *int = flag.Int("limit", 10, "the maximum allowed duration of time to answer each quiz question in seconds")
+var maxTimeLimit *int = flag.Int("limit", 30, "the maximum allowed duration of time to answer each quiz question in seconds")
 
 // define parser to
 //   * read in the multi-dimensional slice of `question, answer` i.e. CSV file data
