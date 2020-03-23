@@ -2,7 +2,7 @@
 
 A simple Golang implementation of a Quiz that:
 
-* asks a user a simple questions
+* asks a user simple maths questions
 * validates their answer
 * computes their % correct answer
 * times the user in between questions
@@ -42,9 +42,9 @@ where `<newFileName.csv>` refers to the full-path for the new quiz data content/
 
 ### To run the quiz with different time duration per question
 
-The `limit` flag can be use to adjust the countdown timer (in `seconds`) for each question i.e. the quiz would end if the user does not supply an answer within a time limit. Currently, the default value is `30` i.e. `30 seconds`. To chnage the limit use:
+The `limit` flag can be use to adjust the countdown timer (in `seconds`) for each question i.e. the quiz would end if the user does not supply an answer within a time limit. Currently, the default value is `30` i.e. `30 seconds`. To change the countdown timer, run the code with the desired limit flag value e.g. :
 
 ```bash
     $ ./goQuiz -limit="45"
 ```
-where `45` means the user now `45 seconds` to answer each question.
+where `45` means the user now has `45 seconds` to answer each question.
