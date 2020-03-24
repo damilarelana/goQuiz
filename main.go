@@ -33,6 +33,7 @@ var maxTimeLimit *int = flag.Int("limit", 30, "the maximum allowed duration of t
 
 // define parser to
 //   * read in the multi-dimensional slice of `question, answer` i.e. CSV file data
+//   * parses it into a problem struct format
 //   * and then return a 1 dimensional slice of `question, answer` i.e. a value of type `problem`
 func parseRecords(records [][]string) []problem {
 	returnedValue := make([]problem, len(records))
@@ -45,17 +46,24 @@ func parseRecords(records [][]string) []problem {
 	return returnedValue
 }
 
-// defines the quiz handler that:
-//   * extracts the question and answer from the CSV
-//   * parses it into a problem struct format
-// 	 * asks the user by iterating through the parsed data
-func questionHandler(file *os.File) {
-	r := csv.NewReader(file)
+// define reader to
+//   * read in the parser data
+// 	 * return a slice of problems [i.e. questions and answers]
+func readRecords(f *os.File) []problem {
+	r := csv.NewReader(f)
 	records, err := r.ReadAll()
 	if err != nil {
-		errMsgHandler("Failed to parse the provided CSV file")
+		errMsgHandler("Failed to read the provided CSV file")
 	}
-	problems := parseRecords(records)
+	p := parseRecords(records)
+	return p
+}
+
+// defines the quiz handler that:
+//   * reads in the question and answer from the CSV
+// 	 * asks the user by iterating through the parsed data
+func questionHandler(file *os.File) {
+	problems := readRecords(file)
 
 	correctAnsCount := 0         // initialize counter for number of questions answer correctly
 	for i, p := range problems { // iterate through the questions with the user
