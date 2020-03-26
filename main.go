@@ -31,6 +31,19 @@ var answerChannel = make(chan string)
 var csvFilename *string = flag.String("csv", "quizData.csv", "a csv file containing question/answer data, in a 'question, answer' format per record line")
 var maxTimeLimit *int = flag.Int("limit", 30, "the maximum allowed duration of time to answer each quiz question in seconds")
 
+// define reader to
+//   * read in the parser data
+// 	 * return a slice of problems [i.e. questions and answers]
+func readRecords(f *os.File) []problem {
+	r := csv.NewReader(f)
+	records, err := r.ReadAll()
+	if err != nil {
+		errMsgHandler("Failed to read the provided CSV file")
+	}
+	p := parseRecords(records)
+	return p
+}
+
 // define parser to
 //   * read in the multi-dimensional slice of `question, answer` i.e. CSV file data
 //   * parses it into a problem struct format
@@ -44,19 +57,6 @@ func parseRecords(records [][]string) []problem {
 		}
 	}
 	return returnedValue
-}
-
-// define reader to
-//   * read in the parser data
-// 	 * return a slice of problems [i.e. questions and answers]
-func readRecords(f *os.File) []problem {
-	r := csv.NewReader(f)
-	records, err := r.ReadAll()
-	if err != nil {
-		errMsgHandler("Failed to read the provided CSV file")
-	}
-	p := parseRecords(records)
-	return p
 }
 
 // defines the quiz handler that:
